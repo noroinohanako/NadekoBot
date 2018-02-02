@@ -11,8 +11,8 @@ namespace NadekoBot.Core.Services.Database.Models
         public bool ForwardMessages { get; set; } = true;
         public bool ForwardToAllOwners { get; set; } = true;
 
-        public float CurrencyGenerationChance { get; set; } = 0.02f;
-        public int CurrencyGenerationCooldown { get; set; } = 10;
+        public float CurrencyGenerationChance { get; set; } = 0.03f;
+        public int CurrencyGenerationCooldown { get; set; } = 5;
 
         public List<PlayingStatus> RotatingStatusMessages { get; set; } = new List<PlayingStatus>();
 
@@ -20,9 +20,9 @@ namespace NadekoBot.Core.Services.Database.Models
         public string RemindMessageFormat { get; set; } = "❗⏰**I've been told to remind you to '%message%' now by %user%.**⏰❗";
 
         //currency
-        public string CurrencySign { get; set; } = "🌸";
-        public string CurrencyName { get; set; } = "Nadeko Flower";
-        public string CurrencyPluralName { get; set; } = "Nadeko Flowers";
+        public string CurrencySign { get; set; } = "🌿";
+        public string CurrencyName { get; set; } = "Happycane";
+        public string CurrencyPluralName { get; set; } = "Happycanes";
 
         public int TriviaCurrencyReward { get; set; } = 0;
         public int MinimumBetAmount { get; set; } = 2;
@@ -54,10 +54,7 @@ For a specific command help, use `{1}h CommandName` (for example {1}h {1}q)
 
 
 **LIST OF COMMANDS CAN BE FOUND ON THIS LINK**
-<http://nadekobot.readthedocs.io/en/latest/Commands%20List/>
-
-
-Nadeko Support Server: https://discord.gg/nadekobot";
+<http://nadekobot.readthedocs.io/en/latest/Commands%20List/>";
 
         public int MigrationVersion { get; set; }
 
