@@ -6,6 +6,7 @@ namespace NadekoBot.Core.Services
     public interface IStatsService : INService
     {
         string Author { get; }
+        string Maintainer { get; }
         long CommandsRan { get; }
         string Heap { get; }
         string Library { get; }

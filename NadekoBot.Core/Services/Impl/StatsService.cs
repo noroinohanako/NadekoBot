@@ -23,6 +23,8 @@ namespace NadekoBot.Core.Services.Impl
 
         public const string EspyBotVersion = "1.0.0";
         public const string NadekoBotVersion = "2.13.8";
+        public const string BotVersion = NadekoBotVersion;
+
         public string Author => "Kwoth#2560";
         public string Maintainer => "noroinohanako#5239";
         public string Library => "Discord.Net";
@@ -178,7 +180,7 @@ namespace NadekoBot.Core.Services.Impl
                                 new Dictionary<string, string> {
                                     { "id", string.Concat(MD5.Create().ComputeHash(Encoding.ASCII.GetBytes(_creds.ClientId.ToString())).Select(x => x.ToString("X2"))) },
                                     { "guildCount", nadeko.GuildCount.ToString() },
-                                    { "version", NadekoBotVersion },
+                                    { "version", BotVersion },
                                     { "platform", platform }}))
                             {
                                 content.Headers.Clear();
