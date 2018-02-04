@@ -224,7 +224,7 @@ namespace NadekoBot.Modules.Utility
         {            
             await Context.Channel.EmbedAsync(
                 new EmbedBuilder().WithOkColor()
-                    .WithAuthor(eab => eab.WithName($"EspyBot v{StatsService.EspyBotVersion} (forked from NadekoBot v{StatsService.NadekoBotVersion}")
+                    .WithAuthor(eab => eab.WithName($"EspyBot v{StatsService.EspyBotVersion} (forked from NadekoBot v{StatsService.NadekoBotVersion})")
                                           .WithUrl("http://nadekobot.readthedocs.io/en/latest/")
                                           .WithIconUrl("https://cdn.discordapp.com/avatars/408759554780692480/d0ee11a4e5f3164a35f1e1ee67fa6e1d.png"))
                     .AddField(efb => efb.WithName(GetText("original_author")).WithValue(_stats.Author).WithIsInline(true))
