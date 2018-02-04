@@ -21,8 +21,10 @@ namespace NadekoBot.Core.Services.Impl
         private readonly IBotCredentials _creds;
         private readonly DateTime _started;
 
-        public const string BotVersion = "2.13.8";
+        public const string EspyBotVersion = "1.0.0";
+        public const string NadekoBotVersion = "2.13.8";
         public string Author => "Kwoth#2560";
+        public string Maintainer => "noroinohanako#5239";
         public string Library => "Discord.Net";
 
         public string Heap => Math.Round((double)GC.GetTotalMemory(false) / 1.MiB(), 2)
@@ -176,7 +178,7 @@ namespace NadekoBot.Core.Services.Impl
                                 new Dictionary<string, string> {
                                     { "id", string.Concat(MD5.Create().ComputeHash(Encoding.ASCII.GetBytes(_creds.ClientId.ToString())).Select(x => x.ToString("X2"))) },
                                     { "guildCount", nadeko.GuildCount.ToString() },
-                                    { "version", BotVersion },
+                                    { "version", NadekoBotVersion },
                                     { "platform", platform }}))
                             {
                                 content.Headers.Clear();
@@ -207,8 +209,8 @@ namespace NadekoBot.Core.Services.Impl
             while ((curUser = _client.CurrentUser) == null) Task.Delay(1000).ConfigureAwait(false);
 
             return Task.FromResult($@"
-Author: [{Author}] | Library: [{Library}]
-Bot Version: [{BotVersion}]
+Original Author: [{Author}] | Library: [{Library}]
+Bot Version: [{NadekoBotVersion}]
 Bot ID: {curUser.Id}
 Owner ID(s): {string.Join(", ", _creds.OwnerIds)}
 Uptime: {GetUptimeString()}
