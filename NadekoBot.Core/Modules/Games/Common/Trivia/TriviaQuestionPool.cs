@@ -25,7 +25,7 @@ namespace NadekoBot.Modules.Games.Common.Trivia
 
         public TriviaQuestion GetRandomQuestion(HashSet<TriviaQuestion> exclude, bool isPokemon, bool isYoukai)
         {
-            TriviaQuestion[] Pool = isYoukai ? Youkai : RegularTrivia
+            TriviaQuestion[] Pool = isYoukai ? Youkai : RegularTrivia;
 
             if (Pool.Length == 0)
                 return null;
