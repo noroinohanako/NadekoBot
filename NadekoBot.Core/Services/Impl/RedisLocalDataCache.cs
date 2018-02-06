@@ -23,7 +23,7 @@ namespace NadekoBot.Core.Services.Impl
         private const string pokemonListFile = "data/pokemon/pokemon_list7.json";
         private const string pokemonMapPath = "data/pokemon/name-id_map4.json";
         private const string questionsFile = "data/trivia_questions.json";
-        private const string youkaiTrivia = "data/youkai_trivia.json"
+        private const string youkaiTrivia = "data/youkai_trivia.json";ß
 
         public IReadOnlyDictionary<string, SearchPokemon> Pokemons
         {
