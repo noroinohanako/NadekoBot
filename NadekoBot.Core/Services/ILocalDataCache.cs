@@ -1,4 +1,5 @@
-﻿using NadekoBot.Core.Common.Pokemon;
+﻿
+using NadekoBot.Core.Common.Pokemon;
 using NadekoBot.Modules.Games.Common.Trivia;
 using System.Collections.Generic;
 
@@ -9,6 +10,7 @@ namespace NadekoBot.Core.Services
         IReadOnlyDictionary<string, SearchPokemon> Pokemons { get; }
         IReadOnlyDictionary<string, SearchPokemonAbility> PokemonAbilities { get; }
         TriviaQuestion[] TriviaQuestions { get; }
+        TriviaQuestion[] YoukaiTriviaQuestions { get; }
         IReadOnlyDictionary<int, string> PokemonMap { get; }
     }
 }
