@@ -7,6 +7,8 @@ namespace NadekoBot.Core.Modules.Games.Common.Trivia
     {
         [Option('p', "pokemon", Required = false, Default = false, HelpText = "Whether it's 'Who's that pokemon?' trivia.")]
         public bool IsPokemon { get; set; } = false;
+        [Option('y', "youkai", Required = false, Default = false, HelpText = "Whether it's 'Yo-kai Watch' trivia.")]
+        public bool IsYoukai { get; set; } = false;
         [Option("nohint", Required = false, Default = false, HelpText = "Don't show any hints.")]
         public bool NoHint { get; set; } = false;
         [Option('w', "win-req", Required = false, Default = 10, HelpText = "Winning requirement. Set 0 for an infinite game. Default 10.")]

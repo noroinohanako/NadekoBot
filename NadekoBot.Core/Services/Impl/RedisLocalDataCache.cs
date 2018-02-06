@@ -23,6 +23,7 @@ namespace NadekoBot.Core.Services.Impl
         private const string pokemonListFile = "data/pokemon/pokemon_list7.json";
         private const string pokemonMapPath = "data/pokemon/name-id_map4.json";
         private const string questionsFile = "data/trivia_questions.json";
+        private const string youkaiTrivia = "data/youkai_trivia.json"
 
         public IReadOnlyDictionary<string, SearchPokemon> Pokemons
         {
@@ -45,6 +46,18 @@ namespace NadekoBot.Core.Services.Impl
             private set
             {
                 Set("pokemon_abilities", value);
+            }
+        }
+
+        public TriviaQuestion[] YoukaiTriviaQuestions
+        {
+            get
+            {
+                return Get<TriviaQuestion[]>("youkai_trivia");
+            }
+            private set
+            {
+                Set("youkai_trivia", value);
             }
         }
 
@@ -98,6 +111,7 @@ namespace NadekoBot.Core.Services.Impl
 
             try
             {
+                YoukaiTriviaQuestions = JsonConvert.DeserializeObject<TriviaQuestion[]>(File.ReadAllText(youkaiTrivia));
                 TriviaQuestions = JsonConvert.DeserializeObject<TriviaQuestion[]>(File.ReadAllText(questionsFile));
                 PokemonMap = JsonConvert.DeserializeObject<PokemonNameId[]>(File.ReadAllText(pokemonMapPath))
                         .ToDictionary(x => x.Id, x => x.Name);

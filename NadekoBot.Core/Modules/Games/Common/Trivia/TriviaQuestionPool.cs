@@ -13,7 +13,8 @@ namespace NadekoBot.Modules.Games.Common.Trivia
 
         private readonly NadekoRandom _rng = new NadekoRandom();
 
-        private TriviaQuestion[] Pool => _cache.LocalData.TriviaQuestions;
+        private TriviaQuestion[] RegularTrivia => _cache.LocalData.TriviaQuestions;
+        private TriviaQuestion[] Youkai => _cache.LocalData.YoukaiTriviaQuestions;
         private IReadOnlyDictionary<int, string> Map => _cache.LocalData.PokemonMap;
 
         public TriviaQuestionPool(IDataCache cache)
@@ -22,8 +23,10 @@ namespace NadekoBot.Modules.Games.Common.Trivia
             maxPokemonId = 721; //xd
         }
 
-        public TriviaQuestion GetRandomQuestion(HashSet<TriviaQuestion> exclude, bool isPokemon)
+        public TriviaQuestion GetRandomQuestion(HashSet<TriviaQuestion> exclude, bool isPokemon, bool isYoukai)
         {
+            TriviaQuestion[] Pool = isYoukai ? Youkai : RegularTrivia
+
             if (Pool.Length == 0)
                 return null;
 
