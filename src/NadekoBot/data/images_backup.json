@@ -2,16 +2,16 @@
   "Version": 1,
   "Coins": {
     "Heads": [
-      "https://nadeko-pictures.nyc3.digitaloceanspaces.com/other/coins/heads.png"
+      "https://imgur.com/SO0b6Rd.png"
     ],
     "Tails": [
-      "https://nadeko-pictures.nyc3.digitaloceanspaces.com/other/coins/tails.png"
+      "https://imgur.com/uaTvEMF.png"
     ]
   },
   "Currency": [
-    "https://nadeko-pictures.nyc3.digitaloceanspaces.com/other/currency/0.jpg",
-    "https://nadeko-pictures.nyc3.digitaloceanspaces.com/other/currency/1.jpg",
-    "https://nadeko-pictures.nyc3.digitaloceanspaces.com/other/currency/2.jpg"
+    "https://imgur.com/Sv8Vrkc.png",
+    "https://imgur.com/c0qIK13.png",
+    "https://imgur.com/c0qIK13.png"
   ],
   "Dice": [
     "https://nadeko-pictures.nyc3.digitaloceanspaces.com/other/dice/0.png",
@@ -30,11 +30,11 @@
     "Dot": "https://nadeko-pictures.nyc3.digitaloceanspaces.com/other/rategirl/dot.png"
   },
   "Xp": {
-    "Bg": "https://nadeko-pictures.nyc3.digitaloceanspaces.com/other/xp/bg.png"
+    "Bg": "https://i.imgur.com/i09eU2p.jpg"
   },
   "Rip": {
     "Bg": "https://nadeko-pictures.nyc3.digitaloceanspaces.com/other/rip/rip.png",
-    "Overlay": "https://nadeko-pictures.nyc3.digitaloceanspaces.com/other/rip/overlay.png"
+    "Overlay": "https://i.imgur.com/ZyIzwXt.png"
   },
   "Slots": {
     "Emojis": [
@@ -57,6 +57,6 @@
       "https://nadeko-pictures.nyc3.digitaloceanspaces.com/other/slots/numbers/8.png",
       "https://nadeko-pictures.nyc3.digitaloceanspaces.com/other/slots/numbers/9.png"
     ],
-    "Bg": "https://nadeko-pictures.nyc3.digitaloceanspaces.com/other/slots/bg.png"
+    "Bg": "https://imgur.com/bYhbfjm.png"
   }
 }
