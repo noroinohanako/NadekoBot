@@ -1,11 +1,10 @@
 ﻿using Discord;
 using Discord.Commands;
-using Discord.WebSocket;
 using NadekoBot.Common.Attributes;
+using NadekoBot.Core.Services.Database.Models;
 using NadekoBot.Extensions;
 using NadekoBot.Modules.Xp.Common;
 using NadekoBot.Modules.Xp.Services;
-using NadekoBot.Core.Services.Database.Models;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
@@ -18,12 +17,10 @@ namespace NadekoBot.Modules.Xp
         public class Club : NadekoSubmodule<ClubService>
         {
             private readonly XpService _xps;
-            private readonly DiscordSocketClient _client;
 
-            public Club(XpService xps, DiscordSocketClient client)
+            public Club(XpService xps)
             {
                 _xps = xps;
-                _client = client;
             }
 
             [NadekoCommand, Usage, Description, Aliases]
@@ -76,15 +73,16 @@ namespace NadekoBot.Modules.Xp
             }
 
             [NadekoCommand, Usage, Description, Aliases]
-            public Task ClubIcon([Remainder]string url = null)
+            public async Task ClubIcon([Remainder]string url = null)
             {
                 if ((!Uri.IsWellFormedUriString(url, UriKind.Absolute) && url != null)
-                    || !_service.SetClubIcon(Context.User.Id, url))
+                    || !await _service.SetClubIcon(Context.User.Id, url == null ? null : new Uri(url)))
                 {
-                    return ReplyErrorLocalized("club_icon_error");
+                    await ReplyErrorLocalized("club_icon_error").ConfigureAwait(false);
+                    return;
                 }
 
-                return ReplyConfirmLocalized("club_icon_set");
+                await ReplyConfirmLocalized("club_icon_set").ConfigureAwait(false);
             }
 
             [NadekoCommand, Usage, Description, Aliases]
@@ -119,8 +117,19 @@ namespace NadekoBot.Modules.Xp
                 }
 
                 var lvl = new LevelStats(club.Xp);
+                var users = club.Users
+                    .OrderByDescending(x =>
+                    {
+                        var l = new LevelStats(x.TotalXp).Level;
+                        if (club.OwnerId == x.Id)
+                            return int.MaxValue;
+                        else if (x.IsClubAdmin)
+                            return int.MaxValue / 2 + l;
+                        else
+                            return l;
+                    });
 
-                await Context.Channel.SendPaginatedConfirmAsync(_client, 0, (page) =>
+                await Context.SendPaginatedConfirmAsync(0, (page) =>
                 {
                     var embed = new EmbedBuilder()
                         .WithOkColor()
@@ -129,23 +138,13 @@ namespace NadekoBot.Modules.Xp
                         .AddField("Description", string.IsNullOrWhiteSpace(club.Description) ? "-" : club.Description, false)
                         .AddField("Owner", club.Owner.ToString(), true)
                         .AddField("Level Req.", club.MinimumLevelReq.ToString(), true)
-                        .AddField("Members", string.Join("\n", club.Users
-                            .OrderByDescending(x =>
-                            {
-                                var l = new LevelStats(x.TotalXp).Level;
-                                if (club.OwnerId == x.Id)
-                                    return int.MaxValue;
-                                else if (x.IsClubAdmin)
-                                    return int.MaxValue / 2 + l;
-                                else
-                                    return l;
-                            })
+                        .AddField("Members", string.Join("\n", users
                             .Skip(page * 10)
                             .Take(10)
                             .Select(x =>
                             {
                                 var l = new LevelStats(x.TotalXp);
-                                var lvlStr = Format.Bold($" 『{l.Level}』");
+                                var lvlStr = Format.Bold($" ⟪{l.Level}⟫");
                                 if (club.OwnerId == x.Id)
                                     return x.ToString() + "🌟" + lvlStr;
                                 else if (x.IsClubAdmin)
@@ -157,7 +156,7 @@ namespace NadekoBot.Modules.Xp
                         return embed.WithThumbnailUrl(club.ImageUrl);
 
                     return embed;
-                }, club.Users.Count, 10);
+                }, club.Users.Count, 10).ConfigureAwait(false);
             }
 
             [NadekoCommand, Usage, Description, Aliases]
@@ -175,7 +174,7 @@ namespace NadekoBot.Modules.Xp
                     .Select(x => x.User)
                     .ToArray();
 
-                return Context.Channel.SendPaginatedConfirmAsync(_client, page,
+                return Context.SendPaginatedConfirmAsync(page,
                     curPage =>
                     {
                         var toShow = string.Join("\n", bans
@@ -207,7 +206,7 @@ namespace NadekoBot.Modules.Xp
                     .Select(x => x.User)
                     .ToArray();
 
-                return Context.Channel.SendPaginatedConfirmAsync(_client, page,
+                return Context.SendPaginatedConfirmAsync(page,
                     curPage =>
                     {
                         var toShow = string.Join("\n", apps

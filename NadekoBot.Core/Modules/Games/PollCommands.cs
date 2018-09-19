@@ -33,7 +33,13 @@ namespace NadekoBot.Modules.Games
 
                 var poll = _service.CreatePoll(Context.Guild.Id,
                     Context.Channel.Id, arg);
+                if(poll == null)
+                {
+                    await ReplyErrorLocalized("poll_invalid_input").ConfigureAwait(false);
+                    return;
+                }
                 if (_service.StartPoll(poll))
+                {
                     await Context.Channel
                         .EmbedAsync(new EmbedBuilder()
                             .WithTitle(GetText("poll_created", Context.User.ToString()))
@@ -42,8 +48,11 @@ namespace NadekoBot.Modules.Games
                             string.Join("\n", poll.Answers
                                 .Select(x => $"`{x.Index + 1}.` {Format.Bold(x.Text)}"))))
                         .ConfigureAwait(false);
+                }
                 else
+                {
                     await ReplyErrorLocalized("poll_already_running").ConfigureAwait(false);
+                }
             }
 
             [NadekoCommand, Usage, Description, Aliases]
@@ -54,7 +63,7 @@ namespace NadekoBot.Modules.Games
                 if (!_service.ActivePolls.TryGetValue(Context.Guild.Id, out var pr))
                     return;
 
-                await Context.Channel.EmbedAsync(GetStats(pr.Poll, GetText("current_poll_results")));
+                await Context.Channel.EmbedAsync(GetStats(pr.Poll, GetText("current_poll_results"))).ConfigureAwait(false);
             }
 
             [NadekoCommand, Usage, Description, Aliases]
@@ -76,9 +85,9 @@ namespace NadekoBot.Modules.Games
             public EmbedBuilder GetStats(Poll poll, string title)
             {
                 var results = poll.Votes.GroupBy(kvp => kvp.VoteIndex)
-                                    .ToDictionary(x => x.Key, x => x.Sum(kvp => 1))
-                                    .OrderByDescending(kvp => kvp.Value)
-                                    .ToArray();
+                                    .ToDictionary(x => x.Key, x => x.Sum(kvp => 1));
+
+                var totalVotesCast = results.Sum(x => x.Value);
 
                 var eb = new EmbedBuilder().WithTitle(title);
 
@@ -86,22 +95,23 @@ namespace NadekoBot.Modules.Games
                     .AppendLine(Format.Bold(poll.Question))
                     .AppendLine();
 
-                var totalVotesCast = 0;
-                if (results.Length == 0)
-                {
-                    sb.AppendLine(GetText("no_votes_cast"));
-                }
-                else
-                {
-                    for (int i = 0; i < results.Length; i++)
+                var stats = poll.Answers
+                    .Select(x =>
                     {
-                        var result = results[i];
-                        sb.AppendLine(GetText("poll_result",
-                            result.Key + 1,
-                            Format.Bold(poll.Answers[result.Key].Text),
-                            Format.Bold(result.Value.ToString())));
-                        totalVotesCast += result.Value;
-                    }
+                        results.TryGetValue(x.Index, out var votes);
+
+                        return (x.Index, votes, x.Text);
+                    })
+                    .OrderByDescending(x => x.votes)
+                    .ToArray();
+
+                for (int i = 0; i < stats.Length; i++)
+                {
+                    var (Index, votes, Text) = stats[i];
+                    sb.AppendLine(GetText("poll_result",
+                        Index + 1,
+                        Format.Bold(Text),
+                        Format.Bold(votes.ToString())));
                 }
 
                 return eb.WithDescription(sb.ToString())

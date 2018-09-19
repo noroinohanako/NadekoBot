@@ -19,9 +19,7 @@ namespace NadekoBot.Modules.CustomReactions.Extensions
     {
         private static readonly Regex imgRegex = new Regex("%(img|image):(?<tag>.*?)%", RegexOptions.Compiled);
 
-        private static readonly NadekoRandom rng = new NadekoRandom();
-
-        public static Dictionary<Regex, Func<Match, Task<string>>> regexPlaceholders = new Dictionary<Regex, Func<Match, Task<string>>>()
+        private static Dictionary<Regex, Func<Match, Task<string>>> regexPlaceholders { get; } = new Dictionary<Regex, Func<Match, Task<string>>>()
         {
             { imgRegex, async (match) => {
                 var tag = match.Groups["tag"].ToString();
@@ -30,19 +28,20 @@ namespace NadekoBot.Modules.CustomReactions.Extensions
 
                 var fullQueryLink = $"http://imgur.com/search?q={ tag }";
                 var config = Configuration.Default.WithDefaultLoader();
-                var document = await BrowsingContext.New(config).OpenAsync(fullQueryLink);
+                using(var document = await BrowsingContext.New(config).OpenAsync(fullQueryLink).ConfigureAwait(false))
+                {
+                    var elems = document.QuerySelectorAll("a.image-list-link").ToArray();
 
-                var elems = document.QuerySelectorAll("a.image-list-link").ToArray();
+                    if (!elems.Any())
+                        return "";
 
-                if (!elems.Any())
-                    return "";
+                    var img = (elems.ElementAtOrDefault(new NadekoRandom().Next(0, elems.Length))?.Children?.FirstOrDefault() as IHtmlImageElement);
 
-                var img = (elems.ElementAtOrDefault(new NadekoRandom().Next(0, elems.Length))?.Children?.FirstOrDefault() as IHtmlImageElement);
+                    if (img?.Source == null)
+                        return "";
 
-                if (img?.Source == null)
-                    return "";
-
-                return " " + img.Source.Replace("b.", ".") + " ";
+                    return " " + img.Source.Replace("b.", ".", StringComparison.InvariantCulture) + " ";
+                }
             } }
         };
 
@@ -50,7 +49,7 @@ namespace NadekoBot.Modules.CustomReactions.Extensions
         {
             var rep = new ReplacementBuilder()
                 .WithUser(ctx.Author)
-                .WithClient(client)
+                .WithMention(client)
                 .Build();
 
             str = rep.Replace(str.ToLowerInvariant());
@@ -69,7 +68,7 @@ namespace NadekoBot.Modules.CustomReactions.Extensions
                 else if (pos == WordPosition.End)
                     substringIndex = ctx.Content.Length;
                 else if (pos == WordPosition.Middle)
-                    substringIndex += ctx.Content.IndexOf(resolvedTrigger);
+                    substringIndex += ctx.Content.IndexOf(resolvedTrigger, StringComparison.InvariantCulture);
             }
 
             var rep = new ReplacementBuilder()
@@ -78,11 +77,12 @@ namespace NadekoBot.Modules.CustomReactions.Extensions
                 .Build();
 
             str = rep.Replace(str);
-
+#if !GLOBAL_NADEKO
             foreach (var ph in regexPlaceholders)
             {
-                str = await ph.Key.ReplaceAsync(str, ph.Value);
+                str = await ph.Key.ReplaceAsync(str, ph.Value).ConfigureAwait(false);
             }
+#endif
             return str;
         }
 
@@ -94,9 +94,7 @@ namespace NadekoBot.Modules.CustomReactions.Extensions
 
         public static async Task<IUserMessage> Send(this CustomReaction cr, IUserMessage ctx, DiscordSocketClient client, CustomReactionsService crs)
         {
-            var channel = cr.DmResponse ? await ctx.Author.GetOrCreateDMChannelAsync() : ctx.Channel;
-
-            crs.ReactionStats.AddOrUpdate(cr.Trigger, 1, (k, old) => ++old);
+            var channel = cr.DmResponse ? await ctx.Author.GetOrCreateDMChannelAsync().ConfigureAwait(false) : ctx.Channel;
 
             if (CREmbed.TryParse(cr.Response, out CREmbed crembed))
             {
@@ -110,7 +108,7 @@ namespace NadekoBot.Modules.CustomReactions.Extensions
                     else if (pos == WordPosition.End)
                         substringIndex = ctx.Content.Length;
                     else if (pos == WordPosition.Middle)
-                        substringIndex += ctx.Content.IndexOf(trigger);
+                        substringIndex += ctx.Content.IndexOf(trigger, StringComparison.InvariantCulture);
                 }
 
                 var rep = new ReplacementBuilder()
@@ -120,14 +118,14 @@ namespace NadekoBot.Modules.CustomReactions.Extensions
 
                 rep.Replace(crembed);
 
-                return await channel.EmbedAsync(crembed.ToEmbed(), crembed.PlainText?.SanitizeMentions() ?? "");
+                return await channel.EmbedAsync(crembed.ToEmbed(), crembed.PlainText?.SanitizeMentions() ?? "").ConfigureAwait(false);
             }
-            return await channel.SendMessageAsync((await cr.ResponseWithContextAsync(ctx, client, cr.ContainsAnywhere)).SanitizeMentions());
+            return await channel.SendMessageAsync((await cr.ResponseWithContextAsync(ctx, client, cr.ContainsAnywhere).ConfigureAwait(false)).SanitizeMentions()).ConfigureAwait(false);
         }
 
         public static WordPosition GetWordPosition(this string str, string word)
         {
-            var wordIndex = str.IndexOf(word);
+            var wordIndex = str.IndexOf(word, StringComparison.InvariantCulture);
             if (wordIndex == -1)
                 return WordPosition.None;
 

@@ -2,7 +2,6 @@
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading;
-using System.Threading.Tasks;
 using Discord;
 using Discord.WebSocket;
 using NadekoBot.Extensions;
@@ -12,12 +11,13 @@ using NadekoBot.Core.Services.Impl;
 using NLog;
 using System.Collections.Generic;
 using System.Collections.Concurrent;
+using Microsoft.EntityFrameworkCore;
 
 namespace NadekoBot.Modules.Utility.Services
 {
     public class RemindService : INService
     {
-        public readonly Regex Regex = new Regex(@"^(?:(?<months>\d)mo)?(?:(?<weeks>\d)w)?(?:(?<days>\d{1,2})d)?(?:(?<hours>\d{1,2})h)?(?:(?<minutes>\d{1,2})m)?$",
+        public Regex Regex { get; } = new Regex(@"^(?:(?<months>\d)mo)?(?:(?<weeks>\d)w)?(?:(?<days>\d{1,2})d)?(?:(?<hours>\d{1,2})h)?(?:(?<minutes>\d{1,2})m)?$",
                                 RegexOptions.Compiled | RegexOptions.Multiline);
 
         public string RemindMessageFormat { get; }
@@ -29,8 +29,8 @@ namespace NadekoBot.Modules.Utility.Services
 
         public ConcurrentDictionary<int, Timer> Reminders { get; } = new ConcurrentDictionary<int, Timer>();
 
-        public RemindService(DiscordSocketClient client, 
-            IBotConfigProvider config, 
+        public RemindService(DiscordSocketClient client,
+            IBotConfigProvider config,
             DbService db,
             StartingGuildsService guilds)
         {
@@ -61,7 +61,7 @@ namespace NadekoBot.Modules.Utility.Services
 
             if (time.TotalMilliseconds < 0)
                 time = TimeSpan.FromSeconds(5);
-                
+
             var remT = new Timer(ReminderTimerAction, r, (int)time.TotalMilliseconds, Timeout.Infinite);
             if (!Reminders.TryAdd(r.Id, remT))
             {
@@ -72,13 +72,13 @@ namespace NadekoBot.Modules.Utility.Services
         private async void ReminderTimerAction(object rObj)
         {
             var r = (Reminder)rObj;
-                       
+
             try
             {
                 IMessageChannel ch;
                 if (r.IsPrivate)
                 {
-                    var user = _client.GetGuild(r.ServerId).GetUser(r.ChannelId);
+                    var user = _client.GetUser(r.ChannelId);
                     if (user == null)
                         return;
                     ch = await user.GetOrCreateDMChannelAsync().ConfigureAwait(false);
@@ -94,21 +94,18 @@ namespace NadekoBot.Modules.Utility.Services
                     .WithOkColor()
                     .WithTitle("Reminder")
                     .AddField("Created At", r.DateAdded.HasValue ? r.DateAdded.Value.ToLongDateString() : "?")
-                    .AddField("By", (await ch.GetUserAsync(r.UserId))?.ToString() ?? r.UserId.ToString()),
-                    msg: r.Message.SanitizeMentions());
+                    .AddField("By", (await ch.GetUserAsync(r.UserId).ConfigureAwait(false))?.ToString() ?? r.UserId.ToString()),
+                    msg: r.Message.SanitizeMentions()).ConfigureAwait(false);
             }
-            catch (Exception ex) { _log.Warn(ex); }
+            catch (Exception ex) { _log.Info(ex.Message + $"({r.Id})"); }
             finally
             {
                 using (var uow = _db.UnitOfWork)
                 {
-                    uow.Reminders.Remove(r);
-                    await uow.CompleteAsync();
+                    uow._context.Database.ExecuteSqlCommand($"DELETE FROM Reminders WHERE Id={r.Id};");
+                    uow.Complete();
                 }
-                var _ = Task.Run(() =>
-                {
-                    RemoveReminder(r.Id);
-                });
+                RemoveReminder(r.Id);
             }
         }
 

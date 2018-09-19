@@ -1,11 +1,10 @@
 using NLog;
-using System;
 using System.Diagnostics;
 using System.Threading.Tasks;
 
 namespace NadekoBot.Core.Services.Impl
 {
-    public class YtdlOperation : IDisposable
+    public class YtdlOperation
     {
         private readonly Logger _log;
 
@@ -16,6 +15,11 @@ namespace NadekoBot.Core.Services.Impl
 
         public async Task<string> GetDataAsync(string url)
         {
+            // escape the minus on the video argument
+            // to prevent youtube-dl to handle it like an argument
+            if (url != null && url.StartsWith("-"))
+                url = '\\' + url;
+
             using (Process process = new Process()
             {
                 StartInfo = new ProcessStartInfo()
@@ -29,18 +33,15 @@ namespace NadekoBot.Core.Services.Impl
                 },
             })
             {
+                _log.Debug($"Executing {process.StartInfo.FileName} {process.StartInfo.Arguments}");
+
                 process.Start();
-                var str = await process.StandardOutput.ReadToEndAsync();
-                var err = await process.StandardError.ReadToEndAsync();
-                if(!string.IsNullOrEmpty(err))
+                var str = await process.StandardOutput.ReadToEndAsync().ConfigureAwait(false);
+                var err = await process.StandardError.ReadToEndAsync().ConfigureAwait(false);
+                if (!string.IsNullOrEmpty(err))
                     _log.Warn(err);
                 return str;
             }
-        }
-
-        public void Dispose()
-        {
-
         }
     }
 }

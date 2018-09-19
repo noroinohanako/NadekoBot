@@ -1,11 +1,11 @@
 ﻿using Discord.Commands;
-using Microsoft.EntityFrameworkCore;
 using NadekoBot.Common.Attributes;
 using NadekoBot.Extensions;
-using NadekoBot.Core.Services;
 using System;
 using System.Threading.Tasks;
 using Discord;
+using NadekoBot.Core.Modules.Administration.Services;
+using System.Linq;
 
 #if !GLOBAL_NADEKO
 namespace NadekoBot.Modules.Administration
@@ -14,73 +14,98 @@ namespace NadekoBot.Modules.Administration
     {
         [Group]
         [OwnerOnly]
-        public class DangerousCommands : NadekoSubmodule
+        public class DangerousCommands : NadekoSubmodule<DangerousCommandsService>
         {
-            private readonly DbService _db;
 
-            public DangerousCommands(DbService db)
+            private async Task InternalExecSql(string sql, params object[] reps)
             {
-                _db = db;
-            }
-
-            [NadekoCommand, Usage, Description, Aliases]
-            [OwnerOnly]
-            public async Task ExecSql([Remainder]string sql)
-            {
+                sql = string.Format(sql, reps);
                 try
                 {
-
                     var embed = new EmbedBuilder()
                         .WithTitle(GetText("sql_confirm_exec"))
                         .WithDescription(Format.Code(sql));
 
-                    if (!await PromptUserConfirmAsync(embed))
+                    if (!await PromptUserConfirmAsync(embed).ConfigureAwait(false))
                     {
                         return;
                     }
 
-                    int res;
-                    using (var uow = _db.UnitOfWork)
-                    {
-                        res = uow._context.Database.ExecuteSqlCommand(sql);
-                    }
-
-                    await Context.Channel.SendConfirmAsync(res.ToString());
+                    var res = await _service.ExecuteSql(sql).ConfigureAwait(false);
+                    await Context.Channel.SendConfirmAsync(res.ToString()).ConfigureAwait(false);
                 }
                 catch (Exception ex)
                 {
-                    await Context.Channel.SendErrorAsync(ex.ToString());
+                    await Context.Channel.SendErrorAsync(ex.ToString()).ConfigureAwait(false);
                 }
             }
 
             [NadekoCommand, Usage, Description, Aliases]
             [OwnerOnly]
+            public Task SqlSelect([Remainder]string sql)
+            {
+                var result = _service.SelectSql(sql);
+
+                return Context.SendPaginatedConfirmAsync(0, (cur) =>
+                {
+                    var items = result.Results.Skip(cur * 20).Take(20);
+
+                    if (!items.Any())
+                    {
+                        return new EmbedBuilder()
+                            .WithErrorColor()
+                            .WithFooter(sql)
+                            .WithDescription("-");
+                    }
+
+                    return new EmbedBuilder()
+                        .WithOkColor()
+                        .WithFooter(sql)
+                        .WithTitle(string.Join(" ║ ", result.ColumnNames))
+                        .WithDescription(string.Join('\n', items.Select(x => string.Join(" ║ ", x))));
+
+                }, result.Results.Count, 20);
+            }
+
+            [NadekoCommand, Usage, Description, Aliases]
+            [OwnerOnly]
+            public Task SqlExec([Remainder]string sql) =>
+                InternalExecSql(sql);
+
+            [NadekoCommand, Usage, Description, Aliases]
+            [OwnerOnly]
             public Task DeleteWaifus() =>
-                ExecSql(@"DELETE FROM WaifuUpdates;
-DELETE FROM WaifuItem;
-DELETE FROM WaifuInfo;");
+                SqlExec(DangerousCommandsService.WaifusDeleteSql);
+
+            [NadekoCommand, Usage, Description, Aliases]
+            [OwnerOnly]
+            public Task DeleteWaifu(IUser user) =>
+                DeleteWaifu(user.Id);
+
+            [NadekoCommand, Usage, Description, Aliases]
+            [OwnerOnly]
+            public Task DeleteWaifu(ulong userId) =>
+                InternalExecSql(DangerousCommandsService.WaifuDeleteSql, userId);
 
             [NadekoCommand, Usage, Description, Aliases]
             [OwnerOnly]
             public Task DeleteCurrency() =>
-                ExecSql("UPDATE DiscordUser SET CurrencyAmount=0; DELETE FROM CurrencyTransactions;");
+                SqlExec(DangerousCommandsService.CurrencyDeleteSql);
 
             [NadekoCommand, Usage, Description, Aliases]
             [OwnerOnly]
             public Task DeletePlaylists() =>
-                ExecSql("DELETE FROM MusicPlaylists;");
+                SqlExec(DangerousCommandsService.MusicPlaylistDeleteSql);
 
             [NadekoCommand, Usage, Description, Aliases]
             [OwnerOnly]
             public Task DeleteExp() =>
-                ExecSql(@"DELETE FROM UserXpStats;
-UPDATE DiscordUser
-SET ClubId=NULL,
-    IsClubAdmin=0,
-    TotalXp=0;
-DELETE FROM ClubApplicants;
-DELETE FROM ClubBans;
-DELETE FROM Clubs;");
+                SqlExec(DangerousCommandsService.XpDeleteSql);
+
+            [NadekoCommand, Usage, Description, Aliases]
+            [OwnerOnly]
+            public Task DeleteUnusedCrnQ() =>
+                SqlExec(DangerousCommandsService.DeleteUnusedCustomReactionsAndQuotes);
         }
     }
 }

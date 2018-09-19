@@ -1,6 +1,7 @@
 ﻿using NadekoBot.Core.Services.Database.Models;
 using System.Linq;
 using Microsoft.EntityFrameworkCore;
+using System.Threading.Tasks;
 
 namespace NadekoBot.Core.Services.Database.Repositories.Impl
 {
@@ -39,22 +40,21 @@ namespace NadekoBot.Core.Services.Database.Repositories.Impl
 
         public int GetUserGuildRanking(ulong userId, ulong guildId)
         {
-            if (!_set.Where(x => x.GuildId == guildId && x.UserId == userId).Any())
-            {
-                var cnt = _set.Count(x => x.GuildId == guildId);
-                if (cnt == 0)
-                    return 1;
-                else
-                    return cnt;
-            }
+            //            @"SELECT COUNT(*) + 1
+            //FROM UserXpStats
+            //WHERE GuildId = @p1 AND ((Xp + AwardedXp) > (SELECT Xp + AwardedXp
+            //	FROM UserXpStats
+            //	WHERE UserId = @p2 AND GuildId = @p1
+            //	LIMIT 1));";
 
             return _set
-                .Where(x => x.GuildId == guildId)
-                .Count(x => x.Xp > (_set
-                    .Where(y => y.UserId == userId && y.GuildId == guildId)
-                    .Select(y => y.Xp)
-                    .DefaultIfEmpty()
-                    .Sum())) + 1;
+                .Where(x => x.GuildId == guildId && ((x.Xp + x.AwardedXp) >
+                    (_set
+                        .Where(y => y.UserId == userId && y.GuildId == guildId)
+                        .Select(y => y.Xp + y.AwardedXp)
+                        .FirstOrDefault())
+                ))
+                .Count() + 1;
         }
 
         public void ResetGuildUserXp(ulong userId, ulong guildId)

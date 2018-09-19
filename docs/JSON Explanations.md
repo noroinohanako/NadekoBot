@@ -23,12 +23,14 @@ If you do not see `credentials.json` you will need to rename `credentials_exampl
   "RestartCommand": null,
   "ShardRunCommand": "",
   "ShardRunArguments": "",
-  "ShardRunPort": null
+  "ShardRunPort": null,
+  "TwitchClientId": null,
+  "RedisOptions": null
 }
 ```
 -----
 #### Creating Discord Bot application
-![img2](http://i.imgur.com/x3jWudH.gif)
+![img2](https://i.imgur.com/Vxxeh2n.gif)
 
 - Go to [the Discord developer application page][DiscordApp].
 - Log in with your Discord account.
@@ -41,7 +43,7 @@ If you do not see `credentials.json` you will need to rename `credentials_exampl
 
 
 #### Inviting your bot to your server 
-![img4](http://i.imgur.com/aFK7InR.gif)
+![img4](https://i.imgur.com/6beUSa5.gif)
 
 - [Invite Guide][Invite Guide]
 - Copy your `Client ID` from your [applications page][DiscordApp].
@@ -159,12 +161,21 @@ It should look like:
 	- For Patreon creators only.
 - **PatreonCampaignId**
 	- For Patreon creators only. Id of your campaign.
+- **TwitchClientId**
+	- Optional. In order to avoid ratelimits that may happen if you use .twitch/.stadd function extensively.
+	- [How to get it](https://blog.twitch.tv/client-id-required-for-kraken-api-calls-afbb8e95f843)
+		- Go to [connections page](https://www.twitch.tv/settings/connections) on twitch and register you applicaiton.
+		- Once registered, find your application under Other Connections on the Connections page. Click Edit
+		- You will see your Client ID on the edit page.
 
 ##### Additional Settings
 
 - **TotalShards** 
 	- Required if the bot will be connected to more than 1500 servers. 
 	- Most likely unnecessary to change until your bot is added to more than 1500 servers.
+- **RedisOptions**
+	- Required if the Redis instance is not on localhost or on non-default port.
+	- You can find all available options [here](https://stackexchange.github.io/StackExchange.Redis/Configuration.html).
 - **RestartCommand**
 	- Required if you want to be able to use `.restart` command
 	- It requires command, and arguments to the command which to execute right before bot stops
@@ -225,7 +236,7 @@ and that will save all the changes.
 - **ShardRunArguments**
 	- Arguments to the shard run command
 	- Required if you're sharding your bot on windows using .exe, or in a custom way. 
-	- This internally defaults to `run -c Release -- {0} {1} {2}` which will be enough to run linux and other 'from source' setups
+	- This internally defaults to `run -c Release --no-build -- {0} {1} {2}` which will be enough to run linux and other 'from source' setups
 	- {0} will be replaced by the `shard ID` of the shard being ran, {1} by the shard 0's process id, and {2} by the port shard communication is happening on
 	- If shard0 (main window) is closed, all other shards will close too
 	- For example, if you want to shard your NadekoBot which you installed using windows installer, you would want to set it to `{0} {1} {2}`
