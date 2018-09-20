@@ -2,17 +2,17 @@
   "Version": 3,
   "Coins": {
     "Heads": [
-      "https://imgur.com/GKrnC5z.png"
+      "https://i.imgur.com/rBit07d.png"
     ],
     "Tails": [
-      "https://imgur.com/uaTvEMF.png"
+      "https://i.imgur.com/uaTvEMF.png"
     ]
   },
   "Currency": [
-    "https://imgur.com/Sv8Vrkc.png",
-    "https://imgur.com/Sv8Vrkc.png",
-    "https://imgur.com/c0qIK13.png",
-    "https://imgur.com/c0qIK13.png"
+    "https://i.imgur.com/Sv8Vrkc.png",
+    "https://i.imgur.com/Sv8Vrkc.png",
+    "https://i.imgur.com/c0qIK13.png",
+    "https://i.imgur.com/c0qIK13.png"
   ],
   "Dice": [
     "https://nadeko-pictures.nyc3.digitaloceanspaces.com/other/dice/0.png",
@@ -39,11 +39,11 @@
   },
   "Slots": {
     "Emojis": [
-      "https://nadeko-pictures.nyc3.digitaloceanspaces.com/other/slots/emojis/0.png",
-      "https://nadeko-pictures.nyc3.digitaloceanspaces.com/other/slots/emojis/1.png",
-      "https://nadeko-pictures.nyc3.digitaloceanspaces.com/other/slots/emojis/2.png",
-      "https://nadeko-pictures.nyc3.digitaloceanspaces.com/other/slots/emojis/3.png",
-      "https://nadeko-pictures.nyc3.digitaloceanspaces.com/other/slots/emojis/4.png",
+      "https://i.imgur.com/YUV0PVW.png",
+      "https://i.imgur.com/gvN9RjN.png",
+      "https://i.imgur.com/3lnxzlK.png",
+      "https://i.imgur.com/hkAhxyf.png",
+      "https://i.imgur.com/gvN9RjN.png",
       "https://i.imgur.com/i1A2WSJ.png"
     ],
     "Numbers": [
@@ -58,6 +58,6 @@
       "https://nadeko-pictures.nyc3.digitaloceanspaces.com/other/slots/numbers/8.png",
       "https://nadeko-pictures.nyc3.digitaloceanspaces.com/other/slots/numbers/9.png"
     ],
-    "Bg": "https://imgur.com/bYhbfjm.png"
+    "Bg": "https://i.imgur.com/bYhbfjm.png"
   }
 }
